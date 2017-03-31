@@ -87,7 +87,7 @@ public class SpdnAnalyzer implements AutoCloseable {
                     return "<" + reward.getConfigurationName() + ">[" + reward.getKind().getShortName()
                             + "](" + parameters + ")";
                 })
-                .collect(Collectors.joining(";"));
+                .collect(Collectors.joining("|"));
     }
 
     private Map<String, Double> parseAnalysisResult(String response) {

@@ -1,6 +1,7 @@
 package hu.bme.mit.inf.petridotnet.spdn;
 
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Created by kris on 3/29/17.
@@ -29,5 +30,12 @@ public class AnalysisResult {
         } else {
             return value;
         }
+    }
+
+    @Override
+    public String toString() {
+        return "{" + results.entrySet().stream()
+                .map(entry -> entry.getKey() + "=" + entry.getValue())
+                .collect(Collectors.joining(", ")) + "}";
     }
 }
