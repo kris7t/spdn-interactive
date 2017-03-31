@@ -22,13 +22,13 @@ public class SpdnAnalyzerTest {
         try (SpdnAnalyzer analyzer = spdn.openModel(model, AnalysisConfiguration.DEFAULT)) {
             Parameter incRate = Parameter.ofName("incRate");
             Reward jobsProcessing = Reward.instantanenous("JobsProcessing");
-            AnalysisResult result = runHybridClound(analyzer, 1);
+            AnalysisResult result = runHybridCloud(analyzer, 1);
             assertEquals(19.7500689578786, result.getValue(jobsProcessing), 1e-8);
             assertEquals(0.0624792285292783, result.getSensitivity(jobsProcessing, incRate), 1e-8);
         }
     }
 
-    private AnalysisResult runHybridClound(SpdnAnalyzer analyzer, int i) {
+    private AnalysisResult runHybridCloud(SpdnAnalyzer analyzer, int i) {
         Parameter incRate = Parameter.ofName("incRate");
         Reward jobsProcessing = Reward.instantanenous("JobsProcessing");
         return analyzer.createAnalysisBuilder()
@@ -37,7 +37,7 @@ public class SpdnAnalyzerTest {
                 .withParameter(Parameter.ofName("lbTime"), 1.0002)
                 .withParameter(Parameter.ofName("execTime1"), 0.2)
                 .withParameter(Parameter.ofName("execTime2"), 0.1)
-                .withParameter(Parameter.ofName("failRate"), 0.0002)
+                .withParameter(Parameter.ofName("failRate"), 0.0002 * i)
                 .withParameter(Parameter.ofName("idleFactor"), 0.1)
                 .withParameter(Parameter.ofName("repairTime"), 24)
                 .withParameter(Parameter.ofName("publicRent"), 0.8)
@@ -58,10 +58,10 @@ public class SpdnAnalyzerTest {
 
             // Ignore the result of this calculation.
             for (int i = 1; i <= 10; i++) {
-                AnalysisResult result = runHybridClound(analyzer, i);
+                AnalysisResult result = runHybridCloud(analyzer, i);
             }
 
-            AnalysisResult result = runHybridClound(analyzer, 1);
+            AnalysisResult result = runHybridCloud(analyzer, 1);
             assertEquals(19.7500689578786, result.getValue(jobsProcessing), 1e-8);
             assertEquals(0.0624792285292783, result.getSensitivity(jobsProcessing, incRate), 1e-8);
         }
