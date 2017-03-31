@@ -49,7 +49,7 @@ public class Reward {
         return new Reward(configurationName, kind);
     }
 
-    public static Reward instantanenous(String configurationName) {
+    public static Reward instantaneous(String configurationName) {
         return Reward.of(configurationName, RewardKind.INSTANTANEOUS);
     }
 

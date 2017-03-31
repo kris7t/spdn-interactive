@@ -21,7 +21,7 @@ public class SpdnAnalyzerTest {
         InputStream model = SpdnAnalyzerTest.class.getResourceAsStream("/models/hybrid-cloud.pnml");
         try (SpdnAnalyzer analyzer = spdn.openModel(model, AnalysisConfiguration.DEFAULT)) {
             Parameter incRate = Parameter.ofName("incRate");
-            Reward jobsProcessing = Reward.instantanenous("JobsProcessing");
+            Reward jobsProcessing = Reward.instantaneous("JobsProcessing");
             AnalysisResult result = runHybridCloud(analyzer, 1);
             assertEquals(19.7500689578786, result.getValue(jobsProcessing), 1e-8);
             assertEquals(0.0624792285292783, result.getSensitivity(jobsProcessing, incRate), 1e-8);
@@ -30,7 +30,7 @@ public class SpdnAnalyzerTest {
 
     private AnalysisResult runHybridCloud(SpdnAnalyzer analyzer, int i) {
         Parameter incRate = Parameter.ofName("incRate");
-        Reward jobsProcessing = Reward.instantanenous("JobsProcessing");
+        Reward jobsProcessing = Reward.instantaneous("JobsProcessing");
         return analyzer.createAnalysisBuilder()
                 .withParameter(incRate, 5)
                 .withParameter(Parameter.ofName("p"), 0.75)
@@ -54,11 +54,11 @@ public class SpdnAnalyzerTest {
         InputStream model = SpdnAnalyzerTest.class.getResourceAsStream("/models/hybrid-cloud.pnml");
         try (SpdnAnalyzer analyzer = spdn.openModel(model, AnalysisConfiguration.DEFAULT)) {
             Parameter incRate = Parameter.ofName("incRate");
-            Reward jobsProcessing = Reward.instantanenous("JobsProcessing");
+            Reward jobsProcessing = Reward.instantaneous("JobsProcessing");
 
             // Ignore the result of this calculation.
             for (int i = 1; i <= 10; i++) {
-                AnalysisResult result = runHybridCloud(analyzer, i);
+                runHybridCloud(analyzer, i);
             }
 
             AnalysisResult result = runHybridCloud(analyzer, 1);
