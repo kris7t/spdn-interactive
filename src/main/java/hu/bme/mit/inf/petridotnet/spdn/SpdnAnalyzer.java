@@ -81,11 +81,17 @@ public class SpdnAnalyzer implements AutoCloseable {
         return rewardsToCalculate.entrySet().stream()
                 .map(entry -> {
                     Reward reward = entry.getKey();
-                    String parameters = entry.getValue().stream()
-                            .map(Parameter::getName)
-                            .collect(Collectors.joining(","));
-                    return "<" + reward.getConfigurationName() + ">[" + reward.getKind().getShortName()
-                            + "](" + parameters + ")";
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("<").append(reward.getConfigurationName()).append(">[")
+                            .append(reward.getKind().getShortName()).append(']');
+                    List<Parameter> parameterList = entry.getValue();
+                    if (!parameterList.isEmpty()) {
+                        String parameters = entry.getValue().stream()
+                                .map(Parameter::getName)
+                                .collect(Collectors.joining(","));
+                        sb.append("(").append(parameters).append(")");
+                    }
+                    return sb.toString();
                 })
                 .collect(Collectors.joining("|"));
     }

@@ -30,7 +30,30 @@ public class SimpleServerTest {
                     .run();
             result.getValue(idle);
             result.getSensitivity(idle, requestRate);
-            
+
+            // TODO Add assertions.
+            System.out.println(result);
+        }
+    }
+
+    @Test
+    public void simpleServerTestWithoutSensitivity() {
+        Spdn spdn = new Spdn(temporaryFolder.getRoot().getAbsolutePath());
+        InputStream model = SimpleServerTest.class.getResourceAsStream("/models/simple-server.pnml");
+        try (SpdnAnalyzer analyzer = spdn.openModel(model, AnalysisConfiguration.DEFAULT)) {
+            Parameter requestRate = Parameter.ofName("requestRate");
+            Parameter serviceTime = Parameter.ofName("serviceTime");
+            Reward idle = Reward.instantaneous("Idle");
+            Reward servedRequests = Reward.instantaneous("ServedRequests");
+            AnalysisResult result = analyzer.createAnalysisBuilder()
+                    .withParameter(requestRate, 1.5)
+                    .withParameter(serviceTime, 0.25)
+                    .withReward(idle)
+                    .withReward(servedRequests)
+                    .run();
+            result.getValue(idle);
+
+            // TODO Add assertions.
             System.out.println(result);
         }
     }
