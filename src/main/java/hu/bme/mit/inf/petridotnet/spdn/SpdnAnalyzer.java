@@ -4,6 +4,7 @@ import hu.bme.mit.inf.petridotnet.spdn.internal.SpdnProcess;
 import hu.bme.mit.inf.petridotnet.spdn.internal.SpdnWorkspace;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +44,7 @@ public class SpdnAnalyzer implements AutoCloseable {
                     workspace.extract();
                     process = new SpdnProcess(getExecutableLocation(), getArguments());
                 } catch (IOException e) {
-                    throw new RuntimeException("Error while starting SPDN", e);
+                    throw new SpdnException("Error while starting SPDN", e);
                 }
             }
             try {
@@ -51,7 +52,7 @@ public class SpdnAnalyzer implements AutoCloseable {
                 process.send(getRewardsToCalculateString(rewardsToCalculate));
                 return parseAnalysisResult(process.receive());
             } catch (IOException e) {
-                throw new RuntimeException("Error while communicating with SPDN", e);
+                throw new SpdnException("Error while communicating with SPDN", e);
             }
         }
     }
@@ -98,14 +99,26 @@ public class SpdnAnalyzer implements AutoCloseable {
 
     private Map<String, Double> parseAnalysisResult(String response) {
         if (response.startsWith(ERROR_OUTPUT_PREFIX)) {
-            throw new RuntimeException("SDPN analysis has failed: " + response);
+            throw new SpdnException("SDPN analysis has failed: " + response);
         }
         if (!VALID_OUTPUT.matcher(response).find()) {
-            throw new RuntimeException("Malformatted SPDN output: " + response);
+            throw new SpdnException("Malformed SPDN output: " + response);
         }
         return Arrays.stream(response.split(";"))
                 .map(i -> i.split("="))
-                .collect(Collectors.toMap(array -> array[0], array -> Double.parseDouble(array[1])));
+                .collect(Collectors.toMap(array -> array[0], array -> parseAnalysisResult(array[0], array[1])));
+    }
+
+    private Double parseAnalysisResult(String rewardName, String resultString) {
+        if (resultString.contains("NaN")) {
+            throw new SpdnException("Analysis result " + rewardName + " is not a number");
+        } else {
+            try {
+                return Double.parseDouble(resultString);
+            } catch (NumberFormatException e) {
+                throw new SpdnException("Analysis result " + rewardName + "cannot be parsed: " + e.getMessage(), e);
+            }
+        }
     }
 
     @Override
@@ -114,7 +127,7 @@ public class SpdnAnalyzer implements AutoCloseable {
             try {
                 process.close();
             } catch (IOException e) {
-                throw new RuntimeException("Failed to close SPDN", e);
+                throw new SpdnException("Failed to close SPDN", e);
             }
         }
     }

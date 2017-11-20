@@ -35,7 +35,7 @@ public class Spdn {
             } while (tempFile.exists());
             Files.copy(stream, tempFile.toPath());
         } catch (IOException e) {
-            throw new RuntimeException("Could not write PNML to workspace", e);
+            throw new SpdnException("Could not write PNML to workspace", e);
         }
         return openModel(tempFile.getAbsolutePath(), analysisConfiguration);
     }
