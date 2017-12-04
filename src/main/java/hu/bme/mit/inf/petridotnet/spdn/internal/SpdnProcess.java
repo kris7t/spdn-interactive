@@ -20,13 +20,16 @@ public class SpdnProcess implements Closeable {
 
     public SpdnProcess(String executablePath, List<String> args) throws IOException {
         List<String> commandLine = new ArrayList<>(args.size() + 2);
+        commandLine.add(MONO_COMMAND);
         commandLine.add(executablePath);
         commandLine.addAll(args);
         Process startedProcess;
         try {
+            // HACK First try running with mono, because under Ubuntu `run-detectors`
+            // will fail when running an .exe without throwing an exception.
             startedProcess = new ProcessBuilder().command(commandLine).start();
         } catch (IOException e) {
-            commandLine.add(0, MONO_COMMAND);
+            commandLine.remove(0);
             startedProcess = new ProcessBuilder().command(commandLine).start();
         }
         process = startedProcess;
