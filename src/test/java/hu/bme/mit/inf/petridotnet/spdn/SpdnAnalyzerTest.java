@@ -28,6 +28,22 @@ public class SpdnAnalyzerTest {
         }
     }
 
+    @Test
+    public void testHybridCloudWithTolerance() {
+        Spdn spdn = new Spdn(temporaryFolder.getRoot().getAbsolutePath());
+        InputStream model = SpdnAnalyzerTest.class.getResourceAsStream("/models/hybrid-cloud.pnml");
+        try (SpdnAnalyzer analyzer = spdn.openModel(model, AnalysisConfiguration.DEFAULT)) {
+            analyzer.setTolerance(1e-4);
+            Parameter incRate = Parameter.ofName("incRate");
+            Reward jobsProcessing = Reward.instantaneous("JobsProcessing");
+            AnalysisResult result = runHybridCloud(analyzer, 1);
+            assertEquals(19.7500689578786, result.getValue(jobsProcessing), 1e-2);
+            assertEquals(0.0624792285292783, result.getSensitivity(jobsProcessing, incRate), 1e-2);
+            assertNotEquals(19.7500689578786, result.getValue(jobsProcessing), 1e-8);
+            assertNotEquals(0.0624792285292783, result.getSensitivity(jobsProcessing, incRate), 1e-8);
+        }
+    }
+
     private AnalysisResult runHybridCloud(SpdnAnalyzer analyzer, int i) {
         Parameter incRate = Parameter.ofName("incRate");
         Reward jobsProcessing = Reward.instantaneous("JobsProcessing");

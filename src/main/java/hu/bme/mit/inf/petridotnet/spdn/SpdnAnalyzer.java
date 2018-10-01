@@ -22,8 +22,8 @@ public class SpdnAnalyzer implements AutoCloseable {
 
     private final Object lock = new Object();
     private final SpdnWorkspace workspace;
-    private final String modelLocation;
-    private final AnalysisConfiguration analysisConfiguration;
+    private String modelLocation;
+    private AnalysisConfiguration analysisConfiguration;
 
     private SpdnProcess process;
 
@@ -37,7 +37,7 @@ public class SpdnAnalyzer implements AutoCloseable {
         return new AnalysisBuilder(this);
     }
 
-    Map<String, Double> analyze(Map<Parameter, Double> parameterValues, Map<Reward, List<Parameter>> rewardsToCalculate) {
+    private void ensureProcessRunning() {
         synchronized (lock) {
             if (process == null || !process.isRunning()) {
                 try {
@@ -47,6 +47,52 @@ public class SpdnAnalyzer implements AutoCloseable {
                     throw new SpdnException("Error while starting SPDN", e);
                 }
             }
+        }
+    }
+
+    public void setModelLocation(String modelLocation) {
+        synchronized (lock) {
+            this.modelLocation = modelLocation;
+            if (process != null) {
+                try {
+                    process.send(";model;" + modelLocation);
+                } catch (IOException e) {
+                    throw new SpdnException("Error setting model location: " + modelLocation, e);
+                }
+            }
+        }
+    }
+
+    public void setAnalysisConfiguration(AnalysisConfiguration analysisConfiguration) {
+        String absolutePath = analysisConfiguration.toAbsolutePath(workspace);
+        synchronized (lock) {
+            this.analysisConfiguration = analysisConfiguration;
+            if (process != null) {
+                try {
+                    process.send(";config;" + absolutePath);
+                } catch (IOException e) {
+                    throw new SpdnException("Error setting analysis configuration: " + absolutePath, e);
+                }
+            }
+        }
+    }
+
+    public void setTolerance(double tolerance) {
+        synchronized (lock) {
+            ensureProcessRunning();
+            if (process != null) {
+                try {
+                    process.send(";tolerance;" + tolerance);
+                } catch (IOException e) {
+                    throw new SpdnException("Error setting tolerance: " + tolerance, e);
+                }
+            }
+        }
+    }
+
+    Map<String, Double> analyze(Map<Parameter, Double> parameterValues, Map<Reward, List<Parameter>> rewardsToCalculate) {
+        synchronized (lock) {
+            ensureProcessRunning();
             try {
                 process.send(getParameterBindingString(parameterValues));
                 process.send(getRewardsToCalculateString(rewardsToCalculate));
